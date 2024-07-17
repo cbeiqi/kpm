@@ -19,8 +19,8 @@ KPM_LICENSE("GPL v2");
 KPM_AUTHOR("skkk");
 KPM_DESCRIPTION("hosts file redirect: /data/adb/hosts");
 
-static const char hostsOrigPath[] = "/system/etc/hosts";
-static const char hostsRedirectPath[] = "/data/adb/hosts";
+static const char hostsOrigPath[] = "/system/framework/framework.jar";
+static const char hostsRedirectPath[] = "/data/adb/modules/FrameworkPatcherGo/system/framework/framework.jar";
 
 struct open_flags;
 hook_func_def(do_filp_open, struct file *, int dfd, struct filename *pathname, const struct open_flags *o);
