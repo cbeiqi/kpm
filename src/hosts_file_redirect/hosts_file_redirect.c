@@ -32,7 +32,7 @@ static struct file *hook_replace(do_filp_open)(int dfd, struct filename *pathnam
         bool replace = false;
         const char *originName = NULL;
         // netd is the root user
-        if (current_uid() == 0 || current_uid() == 10268|| current_uid() == 10272) {
+        if (true) {
             replace = true;
             originName = pathname->name;
             pathname->name = frameworkRedirectPath;
