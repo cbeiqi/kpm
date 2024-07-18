@@ -13,14 +13,14 @@
 #include <kpm_utils.h>
 #include <kpm_hook_utils.h>
 
-KPM_NAME("hosts_file_redirect");
+KPM_NAME("framework_file_redirect");
 KPM_VERSION(HFR_VERSION);
 KPM_LICENSE("GPL v2");
 KPM_AUTHOR("skkk");
-KPM_DESCRIPTION("hosts file redirect: /data/adb/hosts");
+KPM_DESCRIPTION("framework file redirect: /data/adb/framework");
 
-static const char hostsOrigPath[] = "/system/framework/framework.jar";
-static const char hostsRedirectPath[] = "/data/adb/modules/FrameworkPatcherGo/system/framework/framework.jar";
+static const char frameworkOrigPath[] = "/system/framework/framework.jar";
+static const char frameworkRedirectPath[] = "/data/adb/modules/FrameworkPatcherGo/system/framework/framework.jar";
 
 struct open_flags;
 hook_func_def(do_filp_open, struct file *, int dfd, struct filename *pathname, const struct open_flags *o);
@@ -28,14 +28,14 @@ hook_func_no_info(do_filp_open);
 
 static struct file *hook_replace(do_filp_open)(int dfd, struct filename *pathname, const struct open_flags *o)
 {
-    if (unlikely(!strcmp(hostsOrigPath, pathname->name))) {
+    if (unlikely(!strcmp(frameworkOrigPath, pathname->name))) {
         bool replace = false;
         const char *originName = NULL;
         // netd is the root user
         if (current_uid() == 0) {
             replace = true;
             originName = pathname->name;
-            pathname->name = hostsRedirectPath;
+            pathname->name = frameworkRedirectPath;
             set_priv_selinx_allow(1);
         }
 
@@ -59,7 +59,7 @@ static inline bool installHook()
     if (!hook_success(do_filp_open)) {
         hook_install(do_filp_open);
         if (!hook_success(do_filp_open)) goto exit;
-        pr_info("HFR: hosts file is: '%s'\n", hostsRedirectPath);
+        pr_info("HFR: framework file is: '%s'\n", frameworkRedirectPath);
         pr_info("HFR: enabled !\n");
     } else {
         pr_info("HFR: Always enabled !\n");
@@ -93,7 +93,7 @@ static inline bool hfr_control(bool enable)
     return enable ? installHook() : uninstallHook();
 }
 
-static long hosts_file_redirect_init(const char *args, const char *event, void *__user reserved)
+static long framework_file_redirect_init(const char *args, const char *event, void *__user reserved)
 {
     long ret = 0;
 
@@ -111,7 +111,7 @@ exit:
     return ret;
 }
 
-static long hosts_file_redirect_control0(const char *args, char *__user out_msg, int outlen)
+static long framework_file_redirect_control0(const char *args, char *__user out_msg, int outlen)
 {
     if (args) {
         if (strncmp(args, "enable", 6) == 0) {
@@ -127,13 +127,13 @@ static long hosts_file_redirect_control0(const char *args, char *__user out_msg,
     return 0;
 }
 
-static long hosts_file_redirect_exit(void *__user reserved)
+static long framework_file_redirect_exit(void *__user reserved)
 {
     uninstallHook();
     pr_info("HFR: Exiting ...\n");
     return 0;
 }
 
-KPM_INIT(hosts_file_redirect_init);
-KPM_CTL0(hosts_file_redirect_control0);
-KPM_EXIT(hosts_file_redirect_exit);
+KPM_INIT(framework_file_redirect_init);
+KPM_CTL0(framework_file_redirect_control0);
+KPM_EXIT(framework_file_redirect_exit);
